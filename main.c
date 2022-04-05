@@ -31,7 +31,7 @@ int main(int argc, char *argv[ ])
     exit(1);
   }
 
-  dev = fd;    // global dev same as this fd   
+  dev = fd;    // global dev same as this fd
 
   /********** read super block  ****************/
   get_block(dev, 1, buf);
@@ -41,12 +41,12 @@ int main(int argc, char *argv[ ])
   if (sp->s_magic != 0xEF53){
       printf("magic = %x is not an ext2 filesystem\n", sp->s_magic);
       exit(1);
-  }     
+  }
   printf("EXT2 FS OK\n");
   ninodes = sp->s_inodes_count;
   nblocks = sp->s_blocks_count;
 
-  get_block(dev, 2, buf); 
+  get_block(dev, 2, buf);
   gp = (GD *)buf;
 
   bmap = gp->bg_block_bitmap;
@@ -54,7 +54,7 @@ int main(int argc, char *argv[ ])
   iblk = gp->bg_inode_table;
   printf("bmp=%d imap=%d inode_start = %d\n", bmap, imap, iblk);
 
-  init();  
+  init();
   mount_root();
   printf("root refCount = %d\n", root->refCount);
 
@@ -64,9 +64,11 @@ int main(int argc, char *argv[ ])
   printf("root refCount = %d\n", root->refCount);
 
   // WRTIE code here to create P1 as a USER process
-  
+
   while(1){
-    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|quit] ");
+
+    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|link|quit] ");
+
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
 
@@ -76,7 +78,7 @@ int main(int argc, char *argv[ ])
 
     sscanf(line, "%s %s", cmd, pathname);
     printf("cmd=%s pathname=%s\n", cmd, pathname);
-  
+
     if (strcmp(cmd, "ls")==0)
       ls();
     else if (strcmp(cmd, "cd")==0)
@@ -89,6 +91,15 @@ int main(int argc, char *argv[ ])
       mycreat();
     else if (strcmp(cmd, "rmdir")==0)
       myrmdir();
+    else if (strcmp(cmd, "link") == 0)
+    {
+      char* token = strtok(line, " ");
+      token = strtok(NULL, " ");
+      char* old_file = token;
+      token = strtok(NULL, " ");
+      char* new_file = token;
+      myLink(old_file, new_file);
+    }
     else if (strcmp(cmd, "quit")==0)
       quit();
   }
@@ -119,7 +130,7 @@ int init()
 
 // load root INODE and set root pointer to it
 int mount_root()
-{  
+{
   printf("mount_root()\n");
   root = iget(dev, 2);
 }
