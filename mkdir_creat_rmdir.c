@@ -12,7 +12,7 @@ int enter_name(MINODE *pip, int ino, char* name)
     {
         if (pip->INODE.i_block[i] == 0)
         {
-            
+
             blk = balloc(dev);
             pip->INODE.i_size = BLKSIZE;
             pip->INODE.i_block[i] = blk;
@@ -176,7 +176,7 @@ int myrmdir()
         int entries = 0;
         for (int i = 0; i < 12; i++)
         {
-            
+
             char* buf[BLKSIZE];
             get_block(dev, mip->INODE.i_block[i], buf);
             DIR *dp = (DIR*)buf;
@@ -205,12 +205,12 @@ int myrmdir()
             if (entries > 2)
             {
                 printf("DIR is not empty");
-                exit(1);            
+                exit(1);
             }
         }
     }
 
-    
+
     printf("finally out of loops\n");
     //get parent's ino and inode
     int pino = findino(mip, &ino);
@@ -372,7 +372,7 @@ int kcreat(MINODE *pmip, char* bname)
     dp->name[0] = '.';
 
     // make .. entry: pino=parent DIR ino, blk=allocated block
-    dp = (char *)dp + 12;
+    dp = (DIR*)((char *)dp + 12);
     dp->inode = pmip->ino;
     dp->rec_len = BLKSIZE-12; // rec_len spans block
     dp->name_len = 2;

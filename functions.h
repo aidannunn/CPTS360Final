@@ -80,4 +80,14 @@ int rm_child(MINODE *pmip, char *name);
 
 int myrmdir();
 
+int mycreat();
+
+/* link_unlink */
+
+int myLink(char* old_file, char* new_file);
+
+int myUnlink();
+
+int mySymlink(char* old_file, char* new_file);
+
 #endif
