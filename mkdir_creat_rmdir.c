@@ -139,7 +139,6 @@ int rm_child(MINODE *pmip, char *name)
     else if (dp->name != 0)
     {
         //find last entry
-        //get_block(pmip->dev, ip->i_block[i], buf);
         DIR* endDp = (DIR*)buf;
         char* endCp = buf;
         while(endCp + endDp->rec_len < buf + BLKSIZE)
@@ -184,7 +183,7 @@ int myrmdir()
     //verify DIR is empty (traverse data blocks for number of entries = 2)
     if (mip->INODE.i_links_count > 2)
     {
-        printf("DIR is not empty");
+        printf("DIR is not empty->links");
         exit(1);
     }
     if (mip->INODE.i_links_count == 2)
@@ -194,7 +193,7 @@ int myrmdir()
         {
             entries = 0;
             char* buf[BLKSIZE];
-            get_block(mip->dev, mip->INODE.i_block[i], buf);
+            get_block(dev, mip->INODE.i_block[i], buf);
             DIR *dp = (DIR*)buf;
             char *cp = buf;
             //printf("cp=%d\n", cp);
@@ -202,6 +201,7 @@ int myrmdir()
 
             while(cp < buf + BLKSIZE)
             {
+                printf("dp->name=%s\n", dp->name);
                 //printf("adding entry\n");
                 //printf("name = %s\n", dp->name);
                 if (strcmp(dp->name, "")==0)
@@ -361,23 +361,23 @@ int kcreat(MINODE *pmip, char* bname)
     //load INODE into a minode
     MINODE *mip = iget(dev, ino);
     INODE *ip = &mip->INODE;
-    ip->i_mode = 0644;//0x41ED; // 040755: DIR type and permissions
+    ip->i_mode = 33188;//0644;
     ip->i_uid = running->uid; // owner uid
     ip->i_gid = running->gid; // group Id
-    ip->i_size = 0;//BLKSIZE; // size in bytes
-    //ip->i_links_count = 2; // links count=2 because of . and ..
+    ip->i_size = 0;// size in bytes
+    ip->i_links_count = 1;
     ip->i_atime = ip->i_ctime = ip->i_mtime = time(0L);
-    ip->i_blocks = 2; // LINUX: Blocks count in 512-byte chunks
-    ip->i_block[0] = blk; // new DIR has one data block
-    for (int i = 1; i < 15; i++)
+    //ip->i_blocks = 2; // LINUX: Blocks count in 512-byte chunks
+    //ip->i_block[0] = blk; // new DIR has one data block
+    /* for (int i = 1; i < 15; i++)
     {
         ip->i_block[i] = 0;
-    }
+    } */
     mip->dirty = 1; // mark minode dirty
     iput(mip); // write INODE to disk
 
 
-    //make data block 0 of INODE to contain . and .. entries
+    /* //make data block 0 of INODE to contain . and .. entries
     char buf[BLKSIZE];
     bzero(buf, BLKSIZE); // optional: clear buf[ ] to 0
     get_block(dev, blk, buf);
@@ -396,7 +396,7 @@ int kcreat(MINODE *pmip, char* bname)
     dp->rec_len = BLKSIZE-12; // rec_len spans block
     dp->name_len = 2;
     dp->name[0] = dp->name[1] = '.';
-    put_block(dev, blk, buf); // write to blk on disk
+    put_block(dev, blk, buf); // write to blk on disk */
 
     //enter_name()
     enter_name(pmip, ino, bname);
@@ -439,7 +439,7 @@ int mycreat()
 
     kcreat(pmip, bname);
 
-    pmip->INODE.i_links_count = 1;
+    //pmip->INODE.i_links_count = 1;
     pmip->dirty = 1;
 
     iput(pmip);

@@ -42,7 +42,6 @@ int ls_file(MINODE *mip, char *name)
   char *t2 = "----------------";
 
   ip = &(mip->INODE);
-  
   if (S_ISREG(ip->i_mode))
     printf("%c", '-');
   if (S_ISDIR(ip->i_mode))
