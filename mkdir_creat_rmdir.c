@@ -67,7 +67,7 @@ int enter_name(MINODE *pip, int ino, char* name)
 int rm_child(MINODE *pmip, char *name)
 {
     char buf[BLKSIZE];
-    DIR *dp, *follower;
+    DIR *dp, *follower;//add follower pointer to keep track of record right beforehand
     char *cp;
     INODE *ip;
     int flag = 0;
@@ -82,7 +82,7 @@ int rm_child(MINODE *pmip, char *name)
             break;//exit for loop
         }
         ip = &pmip->INODE;
-        get_block(dev, ip->i_block[i], buf);
+        get_block(pmip->dev, ip->i_block[i], buf);
         dp = (DIR*)buf;
         cp = buf;
         while(cp < buf + BLKSIZE)
@@ -97,7 +97,7 @@ int rm_child(MINODE *pmip, char *name)
                 flag = 1;
                 break;//exit while loop search
             }
-            follower = (DIR*)cp;
+            follower = dp;
             cp += dp->rec_len;
             dp = (DIR*)cp;
         }
@@ -105,40 +105,56 @@ int rm_child(MINODE *pmip, char *name)
 
     //delete name entry from parent directory
     //if first and only entry in a data block
-    if (dp->rec_len==BLKSIZE)
+    if (dp->rec_len == BLKSIZE && cp == buf)
     {
         //deallocate the data block
-        bdalloc(dev, dp->inode);
+        bdalloc(pmip->dev, ip->i_block[i]);
         //reduce parent's file size by BLKSIZE
-        pmip->INODE.i_size -= BLKSIZE;
+        ip->i_size -= BLKSIZE;
 
         //compact parent’s i_block[ ] array to eliminate the deleted entry if it’s between nonzero entries
         //look through i_blocks, starting at i, remove the one we stopped on, iterate through the rest and move their numbers backwards to backfill, add 0 to the last one
         //putblock in loop to update afer each edit
         //bzero whole block, write fresh block back to memory
+        i++;
+        for (; i < 12; i++)
+        {
+            if (ip->i_block[i+1] != 0)
+            {
+                get_block(pmip->dev, ip->i_block[i], buf);
+                put_block(pmip->dev, ip->i_block[i-1], buf);
+            }
+        }
+        ip->i_block[i] = 0;
+        put_block(pmip->dev, ip->i_block[i], buf);
     }
     //else if LAST entry in block
     else if((cp + dp->rec_len) == buf + BLKSIZE)
     {
         //absorb rec_len into the predecessor entry
-        int tempLen = dp->rec_len;
-        //add follower pointer to keep track of record right beforehand//cp -= dp->rec_len;
-        //bzero directory to 0
-        dp = (DIR*)cp;
-
-        dp->rec_len += tempLen;//dp should be the prev one
-        //putblock()
+        follower->rec_len += dp->rec_len;
+        put_block(pmip->dev, ip->i_block[i], buf);
     }
     //if entry is first but not the only entry or in the middle of a block:
     else if (dp->name != 0)
     {
-        //
+        //find last entry
+        //get_block(pmip->dev, ip->i_block[i], buf);
+        DIR* endDp = (DIR*)buf;
+        char* endCp = buf;
+        while(endCp + endDp->rec_len < buf + BLKSIZE)
+        {
+            endCp += endDp->rec_len;
+            endDp = (DIR*)endCp;
+        }
         int tempLen = dp->rec_len;
         //move trailing entries left
         memcpy(dp, cp, (&buf[BLKSIZE]-cp));
-        //add deleted rec_len to the LAST entry
-        dp->rec_len += tempLen;
 
+        //add deleted rec_len to the LAST entry
+        endDp->rec_len += tempLen;
+
+        put_block(pmip->dev, ip->i_block[i], buf);
     }
 
     return 0;
@@ -176,9 +192,9 @@ int myrmdir()
         int entries = 0;
         for (int i = 0; i < 12; i++)
         {
-            
+            entries = 0;
             char* buf[BLKSIZE];
-            get_block(dev, mip->INODE.i_block[i], buf);
+            get_block(mip->dev, mip->INODE.i_block[i], buf);
             DIR *dp = (DIR*)buf;
             char *cp = buf;
             //printf("cp=%d\n", cp);
@@ -196,7 +212,7 @@ int myrmdir()
                 //printf("cp=%d\n", cp);
                 //printf("dp->rec_len=%d\n", dp->rec_len);
                 //printf("dp file type=%d\n", dp->file_type);
-                entries++;
+                entries += 1;
                 cp += dp->rec_len;
                 dp = (DIR*)cp;
                 //getchar();
@@ -234,7 +250,10 @@ int myrmdir()
     iput(pmip);
 
     //deallocate its data blocks and inode
-    bdalloc(mip->dev, mip->INODE.i_block[0]);
+    for (int i = 0; i < 12; i++)
+    {
+        bdalloc(mip->dev, mip->INODE.i_block[i]);
+    }
     idalloc(mip->dev, mip->ino);
     iput(mip);
 
@@ -279,7 +298,7 @@ int kmkdir(MINODE *pmip, char* bname)
     dp->name[0] = '.';
 
     // make .. entry: pino=parent DIR ino, blk=allocated block
-    dp = (char *)dp + 12;
+    dp = (DIR* )((char *)dp + 12);
     dp->inode = pmip->ino;
     dp->rec_len = BLKSIZE-12; // rec_len spans block
     dp->name_len = 2;
