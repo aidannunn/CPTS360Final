@@ -72,16 +72,14 @@ int ls_file(MINODE *mip, char *name)
   // print name
   printf("%10s", basename(name)); // print file basename
 
-  //do ls -l and show [dev, ino]
-  printf("\t[%d %2d]", mip->dev,mip->ino);
-
-
   // print -> linkname if symbolic file
   if (S_ISLNK(ip->i_mode))
   {
-      int linkname = myReadlink(mip, buf);// use readlink() to read linkname
-      printf(" -> %8s", linkname); // print linked name
+      printf(" -> %s", (char* )ip->i_block); // print linked name
   }
+
+  //do ls -l and show [dev, ino]
+  printf("  [%d %2d]", mip->dev,mip->ino);
 
   printf("\n");
 

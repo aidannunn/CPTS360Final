@@ -39,6 +39,8 @@ int myUnlink()
     printf("unlink failed, %s is a directory\n", pathname);
     return -1;
   }
+  if (ino == 0)
+    return -1;
   //remove name entry from parent DIR's data block
   parent = dirname(pathname); child = basename(pathname);
   int pino = getino(parent);
@@ -79,8 +81,8 @@ int mySymlink(char* old_file, char* new_file)
   //change new_file to LNK type;
   ino = getino(new_file);
   mip = iget(dev, ino);
-  mip->INODE.i_mode = 0x41ED;
-  //strcpy(mip->INODE.i_block, old_file);
+  mip->INODE.i_mode = 0xA1ED;
+  strcpy((char*)mip->INODE.i_block, old_file);
   mip->INODE.i_size = strlen(old_file);
   mip->dirty = 1;
   iput(mip);
@@ -89,8 +91,7 @@ int mySymlink(char* old_file, char* new_file)
 
 int myReadlink(MINODE* mip, char* buf)
 {
-  if (S_ISLNK(mip->INODE.i_mode) != 0) {
-    printf("Not a LNK file\n");
+  if (!S_ISLNK(mip->INODE.i_mode)) {
     return -1;
   }
   strcpy(buf, (char *)mip->INODE.i_block);
