@@ -38,6 +38,14 @@ int findmyname(MINODE *parent, u32 myino, char myname[]);
 
 int findino(MINODE *mip, u32 *myino);
 
+/* misc.c */
+
+int myStat(char* filename);
+
+int myChmod(char* filename, int mode);
+
+int myUtime(char* filename);
+
 /* alloc.c */
 
 int tst_bit(char *buf, int bit);

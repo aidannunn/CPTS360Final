@@ -16,7 +16,7 @@ int cd()
   if (ino == 0)
   {
     printf("error, ino = 0");
-    exit(1);
+    return -1;
   }
 
   MINODE *mip = iget(dev, ino);
@@ -25,7 +25,7 @@ int cd()
   if (!S_ISDIR(mip->INODE.i_mode))
   {
     printf("error, mip->INODE is not DIR");
-    exit(1);
+    return -1;
   }
 
   iput(running->cwd);
