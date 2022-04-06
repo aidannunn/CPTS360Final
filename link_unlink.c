@@ -79,15 +79,20 @@ int mySymlink(char* old_file, char* new_file)
   //change new_file to LNK type;
   ino = getino(new_file);
   mip = iget(dev, ino);
-  //mip->INODE.i_mode = 0xA1FF;
-  strcpy(mip->INODE.i_block, old_file);
+  mip->INODE.i_mode = 0x41ED;
+  //strcpy(mip->INODE.i_block, old_file);
   mip->INODE.i_size = strlen(old_file);
   mip->dirty = 1;
   iput(mip);
   return 0;
 }
 
-int myReadlink()
+int myReadlink(MINODE* mip, char* buf)
 {
-
+  if (S_ISLNK(mip->INODE.i_mode) != 0) {
+    printf("Not a LNK file\n");
+    return -1;
+  }
+  strcpy(buf, (char *)mip->INODE.i_block);
+  return strlen(buf);
 }

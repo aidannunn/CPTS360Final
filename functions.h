@@ -90,4 +90,6 @@ int myUnlink();
 
 int mySymlink(char* old_file, char* new_file);
 
+int myReadlink(MINODE* mip, char* buf);
+
 #endif

@@ -67,7 +67,7 @@ int main(int argc, char *argv[ ])
 
   while(1){
 
-    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|quit] ");
+    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|quit] ");
 
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;

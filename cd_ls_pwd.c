@@ -42,14 +42,13 @@ int ls_file(MINODE *mip, char *name)
   char *t2 = "----------------";
 
   ip = &(mip->INODE);
-  
   if (S_ISREG(ip->i_mode))
     printf("%c", '-');
   if (S_ISDIR(ip->i_mode))
     printf("%c", 'd');
   if (S_ISLNK(ip->i_mode))
     printf("%c", 'l');
- 
+
   for (int i=8; i >= 0; i--)
   {
     if (ip->i_mode & (1 << i)) // print r|w|x
@@ -67,12 +66,12 @@ int ls_file(MINODE *mip, char *name)
   ftime[strlen(ftime)-1] = 0; // kill \n at end
   printf("%4s ",ftime);
 
-  printf("%8d ",ip->i_size); // file size  
-  
-  
+  printf("%8d ",ip->i_size); // file size
+
+
   // print name
   printf("%10s", basename(name)); // print file basename
-  
+
   //do ls -l and show [dev, ino]
   printf("\t[%d %2d]", mip->dev,mip->ino);
 
@@ -80,10 +79,10 @@ int ls_file(MINODE *mip, char *name)
   // print -> linkname if symbolic file
   if (S_ISLNK(ip->i_mode))
   {
-      int linkname = readlink(name, buf, 256);// use readlink() to read linkname
+      int linkname = myReadlink(mip, buf);// use readlink() to read linkname
       printf(" -> %8s", linkname); // print linked name
   }
-  
+
   printf("\n");
 
   return 0;
@@ -96,16 +95,16 @@ int ls_dir(MINODE *mip)
   char buf[BLKSIZE], temp[256];
   DIR *dp;
   char *cp;
-  
+
   get_block(dev, mip->INODE.i_block[0], buf);
   dp = (DIR *)buf;
   cp = buf;
-  
+
   while (cp < buf + BLKSIZE)
   {
     strncpy(temp, dp->name, dp->name_len);
     temp[dp->name_len] = 0;
-    
+
     mip = iget(dev, dp->inode);
     ls_file(mip, temp);
     iput(mip);
@@ -113,7 +112,7 @@ int ls_dir(MINODE *mip)
     cp += dp->rec_len;
     dp = (DIR *)cp;
   }
-  
+
   printf("\n");
   return 0;
 }
@@ -132,7 +131,7 @@ int ls()
   MINODE *mip = iget(dev, ino);
 
   int mode = mip->INODE.i_mode;
-  
+
   if (S_ISDIR(mode))
     {ls_dir(mip);}
   else
@@ -150,10 +149,10 @@ char rpwd(MINODE *wd)
   int my_ino;
   int parent_ino;
   char my_name[256];
-  
+
   parent_ino = findino(wd, &my_ino);
   printf("my_ino=%d, parent_ino=%d\n", my_ino, parent_ino);
-  
+
   MINODE *pip = iget(dev, parent_ino);
   findmyname(pip, my_ino, my_name);
 
