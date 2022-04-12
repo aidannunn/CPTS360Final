@@ -100,4 +100,7 @@ int mySymlink(char* old_file, char* new_file);
 
 int myReadlink(MINODE* mip, char* buf);
 
+/* open_close_lseek */
+int open_file(int mode);
+
 #endif

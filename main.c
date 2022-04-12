@@ -111,6 +111,8 @@ int main(int argc, char *argv[ ])
       new_file = strtok(NULL, " ");
       mySymlink(old_file, new_file);
     }
+    else if (strcmp(cmd, "open")==0)
+      open_file(argv[2]);
     else if (strcmp(cmd, "quit")==0)
       quit();
   }
@@ -130,6 +132,9 @@ int init()
     mip->refCount = 0;
     mip->mounted = 0;
     mip->mptr = 0;
+  }
+  for (i=0; i<NOFT; i++){
+    oft[i].refCount = 0;
   }
   for (i=0; i<NPROC; i++){
     p = &proc[i];

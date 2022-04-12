@@ -196,11 +196,7 @@ int myrmdir()
     if (mip->INODE.i_links_count > 2)
     {
         printf("DIR is not empty->links");
-<<<<<<< HEAD
-        exit(1);
-=======
         return -1;
->>>>>>> main
     }
     if (mip->INODE.i_links_count == 2)
     {
@@ -264,15 +260,10 @@ int myrmdir()
     //mark parent pmip dirty
     pmip->dirty = 1;
     iput(pmip);
-<<<<<<< HEAD
-    
-=======
 
->>>>>>> main
     bdalloc(mip->dev, mip->INODE.i_block[0]);
     idalloc(mip->dev, mip->ino);
     iput(mip);
-
 }
 
 int kmkdir(MINODE *pmip, char* bname)
