@@ -67,7 +67,7 @@ int main(int argc, char *argv[ ])
 
   while(1){
 
-    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|link|quit] ");
+    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|quit] ");
 
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
@@ -93,12 +93,23 @@ int main(int argc, char *argv[ ])
       myrmdir();
     else if (strcmp(cmd, "link") == 0)
     {
-      char* token = strtok(line, " ");
-      token = strtok(NULL, " ");
-      char* old_file = token;
-      token = strtok(NULL, " ");
-      char* new_file = token;
+      char* token, *old_file, *new_file;
+      token = strtok(line, " ");
+      old_file = strtok(NULL, " ");
+      token = old_file;
+      new_file = strtok(NULL, " ");
       myLink(old_file, new_file);
+    }
+    else if (strcmp(cmd, "unlink") == 0)
+      myUnlink();
+    else if (strcmp(cmd, "symlink") == 0)
+    {
+      char* token, *old_file, *new_file;
+      token = strtok(line, " ");
+      old_file = strtok(NULL, " ");
+      token = old_file;
+      new_file = strtok(NULL, " ");
+      mySymlink(old_file, new_file);
     }
     else if (strcmp(cmd, "quit")==0)
       quit();

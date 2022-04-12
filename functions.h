@@ -38,6 +38,14 @@ int findmyname(MINODE *parent, u32 myino, char myname[]);
 
 int findino(MINODE *mip, u32 *myino);
 
+/* misc.c */
+
+int myStat(char* filename);
+
+int myChmod(char* filename, int mode);
+
+int myUtime(char* filename);
+
 /* alloc.c */
 
 int tst_bit(char *buf, int bit);
@@ -79,5 +87,17 @@ int enter_name(MINODE *pip, int ino, char* name);
 int rm_child(MINODE *pmip, char *name);
 
 int myrmdir();
+
+int mycreat();
+
+/* link_unlink */
+
+int myLink(char* old_file, char* new_file);
+
+int myUnlink();
+
+int mySymlink(char* old_file, char* new_file);
+
+int myReadlink(MINODE* mip, char* buf);
 
 #endif

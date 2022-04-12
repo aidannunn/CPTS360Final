@@ -15,7 +15,7 @@ typedef struct ext2_dir_entry_2 DIR;
 SUPER *sp;
 GD    *gp;
 INODE *ip;
-DIR   *dp;   
+DIR   *dp;
 
 #define FREE        0
 #define READY       1
@@ -39,10 +39,27 @@ typedef struct minode
 typedef struct proc
 {
   struct proc *next;
-  int          pid;      // process ID  
+  int          pid;      // process ID
   int          uid;      // user ID
   int          gid;
-  MINODE      *cwd;      // CWD directory pointer  
+  MINODE      *cwd;      // CWD directory pointer
 }PROC;
+
+typedef struct myst
+{
+  dev_t       myst_dev;     /* device */
+  ino_t       myst_ino;     /* inode */
+  mode_t      myst_mode;    /* protection */
+  nlink_t     myst_nlink;   /* number of hard links */
+  uid_t       myst_uid;     /* user ID of owner */
+  gid_t       myst_gid;     /* group ID of owner */
+  off_t       myst_size;    /* total size, in bytes */
+  dev_t       myst_rdev;    /* device type (if inode device) */
+  u32         myst_blksize; /* blocksize for filesystem I/O */
+  u32         myst_blocks;  /* number of blocks allocated */
+  time_t      myst_mtime;   /* time of last modification */
+  time_t      myst_atime;   /* time of last access */
+  time_t      myst_ctime;   /* time of last change */
+}MYST;
 
 #endif
