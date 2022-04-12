@@ -12,7 +12,7 @@ int enter_name(MINODE *pip, int ino, char* name)
     {
         if (pip->INODE.i_block[i] == 0)
         {
-            
+
             blk = balloc(dev);
             pip->INODE.i_size = BLKSIZE;
             pip->INODE.i_block[i] = blk;
@@ -182,21 +182,25 @@ int myrmdir()
     if (!S_ISDIR(mip->INODE.i_mode))
     {
         printf("inode is not dir\n");
-        exit(1);
+        return -1;
     }
 
     //verify minode is not busy
     if (mip->refCount > 1)
     {
         printf("minode is busy\n");
-        exit(1);
+        return -1;
     }
 
     //verify DIR is empty (traverse data blocks for number of entries = 2)
     if (mip->INODE.i_links_count > 2)
     {
         printf("DIR is not empty->links");
+<<<<<<< HEAD
         exit(1);
+=======
+        return -1;
+>>>>>>> main
     }
     if (mip->INODE.i_links_count == 2)
     {
@@ -204,13 +208,13 @@ int myrmdir()
         for (int i = 0; i < 12; i++)
         {
             char* buf[BLKSIZE];
-            get_block(dev, mip->INODE.i_block[i], buf);
+            get_block(dev, mip->INODE.i_block[i], (char*)buf);
             DIR *dp = (DIR*)buf;
-            char *cp = buf;
+            char *cp = (char*)buf;
             //printf("cp=%d\n", cp);
             //printf("dp->rec_len=%d\n", dp->rec_len);
 
-            while(cp < buf + BLKSIZE)
+            while((int*)cp < ((int*)buf + BLKSIZE))
             {
                 printf("dp->name=%s\n", dp->name);
                 //printf("adding entry\n");
@@ -232,12 +236,12 @@ int myrmdir()
             if (entries > 2)
             {
                 printf("DIR is not empty");
-                exit(1);            
+                return -1;
             }
         }
     }
 
-    
+
     printf("finally out of loops\n");
     //get parent's ino and inode
     int pino = findino(mip, &ino);
@@ -260,7 +264,11 @@ int myrmdir()
     //mark parent pmip dirty
     pmip->dirty = 1;
     iput(pmip);
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> main
     bdalloc(mip->dev, mip->INODE.i_block[0]);
     idalloc(mip->dev, mip->ino);
     iput(mip);
@@ -335,21 +343,21 @@ int mymkdir()
     if (pino == -1)
     {
         printf("dir does not exist\n");
-        exit(1);
+        return -1;
     }
 
     //check pmip->INODE is a DIR
     if (!S_ISDIR(pmip->INODE.i_mode))
     {
         printf("inode is not dir\n");
-        exit(1);
+        return -1;
     }
 
     //check that basename doesn't exist in parent DIR
     if (search(pmip, bname) != 0)
     {
         printf("basename exists in parent dir\n");
-        exit(1);
+        return -1;
     }
 
     kmkdir(pmip, bname);
@@ -428,21 +436,21 @@ int mycreat()
     if (pino == -1)
     {
         printf("file does not exist\n");
-        exit(1);
+        return -1;
     }
 
     //check pmip->INODE is a DIR
     if (!S_ISDIR(pmip->INODE.i_mode))
     {
         printf("inode is not dir\n");
-        exit(1);
+        return -1;
     }
 
     //check that basename doesn't exist in parent DIR
     if (search(pmip, bname) != 0)
     {
         printf("basename exists in parent dir\n");
-        exit(1);
+        return -1;
     }
 
     kcreat(pmip, bname);

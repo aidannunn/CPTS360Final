@@ -30,11 +30,41 @@ MINODE *iget(int dev, int ino);
 
 void iput(MINODE *mip);
 
+int search(MINODE *mip, char *name);
+
 int getino(char *pathname);
 
 int findmyname(MINODE *parent, u32 myino, char myname[]);
 
-int findino(MINODE *mip, u32 **myino);
+int findino(MINODE *mip, u32 *myino);
+
+/* misc.c */
+
+int myStat(char* filename);
+
+int myChmod(char* filename, int mode);
+
+int myUtime(char* filename);
+
+/* alloc.c */
+
+int tst_bit(char *buf, int bit);
+
+int set_bit(char *buf, int bit);
+
+int clr_bit(char* buf, int bit);
+
+int decFreeInodes(int dev);
+
+int incFreeInodes(int dev);
+
+int idalloc(int dev, int ino);
+
+int bdalloc(int dev, int bno);
+
+int ialloc(int dev);
+
+int balloc(int dev);
 
 /* cd_ls_pwd.c */
 int cd();
@@ -55,5 +85,19 @@ int kmkdir(MINODE *pmip, char* bname);
 int enter_name(MINODE *pip, int ino, char* name);
 
 int rm_child(MINODE *pmip, char *name);
+
+int myrmdir();
+
+int mycreat();
+
+/* link_unlink */
+
+int myLink(char* old_file, char* new_file);
+
+int myUnlink();
+
+int mySymlink(char* old_file, char* new_file);
+
+int myReadlink(MINODE* mip, char* buf);
 
 #endif

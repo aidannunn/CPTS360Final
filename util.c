@@ -250,7 +250,7 @@ int findmyname(MINODE *parent, u32 myino, char myname[])
 }
 
 //sort of like search, but only get first two entries ('.' & '..')
-int findino(MINODE *mip, u32 **myino) // myino = i# of . return i# of ..
+int findino(MINODE *mip, u32 *myino) // myino = i# of . return i# of ..
 {
   // mip points at a DIR minode
   // WRITE your code here: myino = ino of .  return ino of ..
