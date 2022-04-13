@@ -7,13 +7,15 @@ int open_file(int mode)
     int i;
     //1. get file's minode
     int ino = getino(pathname);
+    printf("getino succeeded\n");
     if (ino == 0)//file does not exist
     {   
+        printf("file does not exist. creating file\n");
         mycreat();//creat the file
         ino = getino(pathname);//then get the ino
     }
     MINODE *mip = iget(dev, ino);
-
+    
     //check mip->INODE.i_mode to verify it's a regular file and permission OK
     if (mip->INODE.i_mode != 33188)
     {
@@ -30,25 +32,33 @@ int open_file(int mode)
             }
         }
     }
+    
     OFT *oftp;
     //2. allocate an openTable entry OFT; initialize OFT entries
     for (i = 0; i<NOFT; i++)
     {
         if (oft[i].minodePtr == 0){
             oftp = &oft[i];
+            break;
         }
     }
     
     oftp->mode = mode; // mode = 0|1|2|3 for R|W|RW|APPEND 
     oftp->refCount = 1;
     oftp->minodePtr = mip; // point at the file's minode[]
+    if (mode == 3){
+        oftp->offset = mip->INODE.i_size;
+    }
+    else{
+        oftp->offset = 0;
+    }
 
     //Depending on the open mode 0|1|2|3, set the OFT's offset accordingly:
     switch(mode)
     {
         case 0 : oftp->offset = 0;   // R: offset = 0
                  break;
-        case 1 : truncate(mip);      // W: truncate file to 0 size
+        case 1 : mytruncate(mip);      // W: truncate file to 0 size
                  oftp->offset = 0;
                  break;
         case 2 : oftp->offset = 0;   // RW: do NOT truncate file
@@ -62,13 +72,14 @@ int open_file(int mode)
     //3. search for the first FREE fd[index] entry with the lowest index in PROC
     for (i = 0; i < NFD; i++)
     {
-        if (running->fd[i]->refCount == 0){
-            running->fd[i] = &oftp;
+        if (running->fd[i] == 0){
+            running->fd[i] = oftp;
+            break;
         }
     }
-
+    //printf("marked\n");
     //update INODE's time field
-    if (mode == 1)
+    if (mode == 0)
     {
         mip->INODE.i_atime = time(NULL);
     }
@@ -82,7 +93,7 @@ int open_file(int mode)
     return i;
 }
 
-int truncate(MINODE* mip)
+int mytruncate(MINODE* mip)
 {
     int i, buf12[256],  buf13[256], dbuf[256];
     //1. release mip->INODE's data blocks;
@@ -135,4 +146,71 @@ int truncate(MINODE* mip)
     //3. set INODE's size to 0 and mark Minode[ ] dirty
     mip->INODE.i_size = 0;
     mip->dirty = 1;
+}
+
+int close_file(int fd)
+{
+    printf("fd=%d\n", fd);
+    //1. verify fd is within range
+    if (fd < 0 || fd > NFD-1){
+        printf("fd out of range\n");
+        return -1;
+    }
+
+    //2. verify running->fd[fd] is pointing at a OFT entry
+    if (running->fd[fd] == 0){
+        printf("running->fd[fd] is not pointing at an OFT entry\n");
+        return -1;
+    }
+
+    //3. rest of code from website
+    OFT* oftp = running->fd[fd];
+    running->fd[fd] = 0;
+    printf("mark2\n");
+    oftp->refCount--;
+
+    if(oftp->refCount > 0){
+        return 0;
+    }
+    printf("mark3\n");
+    MINODE* mip = oftp->minodePtr;
+    iput(mip);
+    return 0;
+}
+
+int mylseek(int fd, int position)
+{   
+    //from fd, find the OFT entry
+    OFT* oftp = &oft[fd];
+
+    int originalPosition = oftp->offset;
+
+    //change OFT entry's offset to position, but make sure NOT to over run either end of the file
+    if (position < 0 )//|| position > (fileSize-1))//figure out how to get filesize
+    {
+        printf("position out of bounds\n");
+        return -1;
+    }
+    oftp->offset = position;
+
+    //return originalPosition
+    return originalPosition;
+}
+
+int pfd()
+{
+    int i;
+    printf("    fd    mode    offset    INODE\n");
+    printf("   ----   ----    ------    -----\n");
+    for (i=0; i<NFD; i++)
+    {
+        if (running->fd[i] == 0){
+            break;
+        }
+        printf("    %d", i);
+        printf("      %d",running->fd[i]->mode);
+        printf("         %d", running->fd[i]->offset);
+        printf("       [%d, %d]\n", running->fd[i]->minodePtr->dev, running->fd[i]->minodePtr->ino);
+    }
+    printf("   ------------------------------\n");
 }
