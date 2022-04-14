@@ -6,6 +6,7 @@
 MINODE minode[NMINODE];
 MINODE *root;
 PROC   proc[NPROC], *running;
+OFT oft[NOFT];
 
 char gpath[128]; // global for tokenized components
 char *name[64];  // assume at most 64 components in pathname

@@ -22,7 +22,7 @@ char *disk = "diskimage";
 
 int main(int argc, char *argv[ ])
 {
-  int ino;
+  int ino, mode;
   char buf[BLKSIZE];
 
   printf("checking EXT2 FS ....");
@@ -67,7 +67,7 @@ int main(int argc, char *argv[ ])
 
   while(1){
 
-    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|quit] ");
+    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|open|close|lseek|pfd|quit] ");
 
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[ ])
        continue;
     pathname[0] = 0;
 
-    sscanf(line, "%s %s", cmd, pathname);
+    sscanf(line, "%s %s %d", cmd, pathname, &mode);
     printf("cmd=%s pathname=%s\n", cmd, pathname);
 
     if (strcmp(cmd, "ls")==0)
@@ -111,6 +111,24 @@ int main(int argc, char *argv[ ])
       new_file = strtok(NULL, " ");
       mySymlink(old_file, new_file);
     }
+    else if (strcmp(cmd, "open")==0)
+      open_file(mode);
+    else if (strcmp(cmd, "close")==0)
+    {
+      char* ptr;
+      int path = strtol(pathname, &ptr, 1);
+      printf("descriptor=%d", path);
+      close_file(path);
+    }
+    else if (strcmp(cmd, "lseek")==0)
+    {
+      char* ptr;
+      int path = strtol(pathname, &ptr, 1);
+      printf("descriptor=%d", path);
+      mylseek(path, mode);
+    }
+    else if (strcmp(cmd, "pfd")==0)
+      pfd();
     else if (strcmp(cmd, "quit")==0)
       quit();
   }
@@ -131,12 +149,21 @@ int init()
     mip->mounted = 0;
     mip->mptr = 0;
   }
+  for (i=0; i<NOFT; i++){
+    oft[i].refCount = 0;
+  }
   for (i=0; i<NPROC; i++){
     p = &proc[i];
     p->pid = i;
     p->uid = p->gid = 0;
     p->cwd = 0;
+    for(j=0; j<NFD; j++)
+    {
+      p->fd[j] = 0;
+    }
+    p->next = &proc[i+1];
   }
+  
 }
 
 // load root INODE and set root pointer to it
