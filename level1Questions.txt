@@ -1,0 +1,83 @@
+CS360 Project Level-1 DEMO RECORD 
+
+
+Team Member Names IDs Aidan Nunn 11658886, William Walker
+                     
+
+                            Check List
+
+     Commands              Expected Results           Observed Results
+--------------------   -------------------------   ------------------------
+1. startup (with an EMPTY diskiamge)
+   ls:                  Show contents of / DIR      _________________________ 10
+
+2. mkdir dir1; ls:      Show /dir1 exists           _________________________ 10
+
+   mkdir dir2; ls:      Show /dir1, /dir2 exist     _________________________ 10
+
+3. mkdir dir1/dir3 
+   ls dir1:             Show dir3 in dir1/          _________________________ 10
+
+4. creat file1          Show /file1 exists          _________________________ 10
+
+5. rmdir dir1           REJECT (dir1 not empty)     _________________________ 10
+
+6. rmdir dir2; ls:      Show dir2 is removed        _________________________ 10
+
+7. link file1 A;ls:     file1,A same ino,  LINK=2   _________________________ 10
+
+8. unlink A; ls:        A deleted, file1's LINK=1   _________________________ 10
+
+9. symlink file1 B;ls:  ls must show   B->file1     _________________________ 10
+
+10.unlink file1; ls:    file1 deleted, B->file1     _________________________ 10
+
+                                                                     Total = 100
+
+QUESTIONS:
+
+1. mkdir_creat depend on
+   enter_name(parent INODE pointer, ino, name)
+ 
+(1). What does it do?
+	enter_name() searched the i_blocks of a directory's inode for a spot to put a new directory.
+	If an i_block is empty, it allocates space to the i_block and puts the directory information inside of it.
+	If an i_block that is not empty is found, enter_name() traverses to the end of that i_block 
+	and checks the record length of the last entry. 
+	The record length of the last entry is it's actual length (ideal length) plus the remaining length in the i_block.
+	If the difference between ideal lenght and current length is greater than the length we need for our new entry,
+	insert the new entry at the end of the i_block by trimming the old last entry to its ideal length and adding the new
+	entry to the end of the i_block.
+	If the length difference is less than what we need for the new entry, look for another i_block that is either empty
+	or has some free space.
+(2). Show enter_name() in your code, explain:
+     Enter [ino|rec_len|name_len|name] into which part of parent's data block?
+     	The above information is entered into a parent's i_block array. 
+     	We do get_block(pip->dev, pip->INODE.i_block[i], buf); and dp = (DIR *)buf;, then use dp-> pointers to insert the new info.
+
+2. rmdir, unlink depend on 
+   rm_child(parent INODE pointer, childname)
+
+(1). What does it do?
+	rm_child() searches the parent directory of a dir we want to remove for the target dir and removes it.
+	First, search the parent inode's i_blocks for the name of the dir we want to remove.
+	When the dir is found, there are three possible cases:
+	(1) the dir is the first and only entry in the data block
+		In this case, deallocate the data block and reduce the parent's size by blocksize.
+		Then, if the deallocated block was somewhere in the middle of the i_block array,
+		iterate through the array and compact the array so there are no empty i_blocks
+		in between non-empty i_blocks.
+	(2) the dir is the last entry in the block
+		(note, when we search for the target dir, keep track of the entry directly before it)
+		In this case, simply add the target dir's record length to the entry directly before it.
+	(3) the dir is the first but not only entry in a block, or is in the middle of a block
+		In this case, first create new pointers and traverse the data block so the new pointers point at
+		the end of the data block.
+		Use memcpy to move the entries to the right of our target entry to the left so that they
+		overwrite the target entry. 
+		Add the deleted length to the last entry in the block.
+	
+(2). show rm_child() function in your code, explain:
+     How to remove childname if it's the last entry in parent data block?
+     See case (2)
+
