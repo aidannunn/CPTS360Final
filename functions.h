@@ -115,4 +115,11 @@ int dup(int fd);
 
 int dup2(int fd, int gd);
 
+/* read_cat */
+
+int myread(int fd, char *buf, int nbytes);
+
+int read_file();
+
+int myCat(char* filename);
 #endif

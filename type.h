@@ -40,7 +40,7 @@ typedef struct minode
 
 typedef struct oft  //OpenFileTable
 {
-  int mode;         //R|W|RE|APP
+  int mode;         //R|W|RW|APP
   int refCount;
   MINODE *minodePtr;
   int offset;
