@@ -9,13 +9,13 @@ int open_file(int mode)
     int ino = getino(pathname);
     printf("getino succeeded\n");
     if (ino == 0)//file does not exist
-    {   
+    {
         printf("file does not exist. creating file\n");
         mycreat();//creat the file
         ino = getino(pathname);//then get the ino
     }
     MINODE *mip = iget(dev, ino);
-    
+
     //check mip->INODE.i_mode to verify it's a regular file and permission OK
     if (mip->INODE.i_mode != 33188)
     {
@@ -26,13 +26,13 @@ int open_file(int mode)
     //check whether the file is already opened with INCOMPATIBLE mode
     for (i = 0; i<NOFT; i++){
         if (oft[i].minodePtr == mip){
-            if (oft[i].mode == 1 || oft[i].mode == 2 || oft[i].mode == 3){
+            if (oft[i].mode == 0 || oft[i].mode == 1 || oft[i].mode == 2 || oft[i].mode == 3){
                 printf("file is already open as an incompatible mode\n");
                 return -1;
             }
         }
     }
-    
+
     OFT *oftp;
     //2. allocate an openTable entry OFT; initialize OFT entries
     for (i = 0; i<NOFT; i++)
@@ -42,8 +42,8 @@ int open_file(int mode)
             break;
         }
     }
-    
-    oftp->mode = mode; // mode = 0|1|2|3 for R|W|RW|APPEND 
+
+    oftp->mode = mode; // mode = 0|1|2|3 for R|W|RW|APPEND
     oftp->refCount = 1;
     oftp->minodePtr = mip; // point at the file's minode[]
     if (mode == 3){
@@ -87,7 +87,7 @@ int open_file(int mode)
     {
         mip->INODE.i_atime = mip->INODE.i_mtime = time(NULL);
     }
-    
+
     mip->dirty = 1;
     //4. return index as file descriptor
     return i;
@@ -112,7 +112,7 @@ int mytruncate(MINODE* mip)
     if (mip->INODE.i_block[12])
     {
         get_block(dev, mip->INODE.i_block[12], (char *) buf12);
-        
+
         for (i=0; i < 256; i++)
         {
             bdalloc(dev, buf12[i]);
@@ -179,7 +179,7 @@ int close_file(int fd)
 }
 
 int mylseek(int fd, int position)
-{   
+{
     //from fd, find the OFT entry
     OFT* oftp = &oft[fd];
 

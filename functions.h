@@ -115,4 +115,22 @@ int dup(int fd);
 
 int dup2(int fd, int gd);
 
+/* read_cat */
+
+int myread(int fd, char *buf, int nbytes);
+
+int read_file();
+
+int myCat(char* filename);
+
+/* write_cp */
+
+int mywrite(int fd, char *buf, int nbytes);
+
+int write_file();
+
+int myCP(char* src, char* dest);
+
+int myMV(char* src, char* dest);
+
 #endif

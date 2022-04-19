@@ -1,3 +1,3 @@
 #! /bin/bash
-cp diskimage.ori diskimage    # use a new copy of disk.ori
+cp mydisk.ori mydisk    # use a new copy of disk.ori
 ./mk                  # cc main.c 
