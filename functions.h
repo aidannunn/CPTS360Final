@@ -128,4 +128,9 @@ int myCat(char* filename);
 int mywrite(int fd, char *buf, int nbytes);
 
 int write_file();
+
+int myCP(char* src, char* dest);
+
+int myMV(char* src, char* dest);
+
 #endif

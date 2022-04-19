@@ -134,3 +134,47 @@ int write_file()
   nbytes = strlen(towrite);
   return(mywrite(fd, towrite, nbytes));
 }
+
+int myCP(char* src, char* dest) //cp src dest
+{
+  char buf[BLKSIZE];
+  //open src for read and dest for write
+  strcpy(pathname, src);
+  int fd = open_file(0);
+  strcpy(pathname, dest);
+  int gd = open_file(1);
+
+  //Copy
+  myread(fd, buf, BLKSIZE);
+  mywrite(gd, buf, strlen(buf));
+
+  //close src and dest
+  close_file(fd);
+  close_file(gd);
+}
+
+int myMV(char* src, char* dest)
+{
+  //Check if src exists
+  int ino = getino(src);
+  MINODE* mip = iget(dev, ino);
+  if (ino == 0) {
+    printf("Source file %s does not exist\n", src);
+    return -1;
+  }
+  //Check if src is same dev as dev (THIS CHECK IS NOT CORRECT, FIX IN LEVEL 3)
+  if (mip->dev == dev)
+  {
+    //case1: same dev
+    myLink(src, dest);
+    strcpy(pathname, src);
+    myUnlink();
+  }
+  else
+  {
+    //case2: Different dev
+    myCP(src, dest);
+    strcpy(pathname, src);
+    myUnlink();
+  }
+}

@@ -67,7 +67,8 @@ int main(int argc, char *argv[ ])
 
   while(1){
 
-    printf("\ninput command : [ls|cd|pwd|cat|mkdir|creat|rmdir|link|unlink|symlink|open|close|read|write|lseek|pfd|quit] ");
+    printf("\ninput command : [ls|cd|pwd|cat|mkdir|creat|cp|mv|rmdir|link|unlink|symlink|open|close|"
+    "read|write|lseek|pfd|quit] ");
 
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
@@ -135,6 +136,26 @@ int main(int argc, char *argv[ ])
       myCat(pathname);
     else if (strcmp(cmd, "write")==0)
       write_file();
+    else if (strcmp(cmd, "cp")==0)
+    {
+      char* token, *src, *dest;
+      token = strtok(line, " ");
+      token = strtok(NULL, " ");
+      src = token;
+      token = strtok(NULL, " ");
+      dest = token;
+      myCP(src, dest);
+    }
+    else if (strcmp(cmd, "mv")==0)
+    {
+      char* token, *src, *dest;
+      token = strtok(line, " ");
+      token = strtok(NULL, " ");
+      src = token;
+      token = strtok(NULL, " ");
+      dest = token;
+      myMV(src, dest);
+    }
     else if (strcmp(cmd, "quit")==0)
       quit();
   }
