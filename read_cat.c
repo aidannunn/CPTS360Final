@@ -51,28 +51,20 @@ int myread(int fd, char *buf, int nbytes)
     char *cp = readbuf + startByte;
     remain = BLKSIZE - startByte;   // number of bytes remain in readbuf[]
 
-    if (remain < nbytes) {
-      memcpy(cq, cp, nbytes);
-      cq += nbytes;
-      cp += nbytes;
-      count += nbytes;
-      oftp->offset += nbytes;
-      avil -= nbytes;
-      remain -= nbytes;
-      nbytes = 0;
-    }
-    else {
-      memcpy(cq, cp, remain);
-      cq += remain;
-      cp += remain;
-      count += remain;
-      oftp->offset += remain;
-      avil -= remain;
-      nbytes -= remain;
-      remain = 0;
-    }
-      if (nbytes <= 0 || avil <= 0)
-        break;
+    if (remain < nbytes)
+      nbytes = remain;
+
+    memcpy(cq, cp, nbytes);
+    cq += nbytes;
+    cp += nbytes;
+    count += nbytes;
+    oftp->offset += nbytes;
+    avil -= nbytes;
+    remain -= nbytes;
+    nbytes = 0;
+
+    if (nbytes <= 0 || avil <= 0)
+      break;
 
       // if one data block is not enough, loop back to OUTER while for more ...
   }

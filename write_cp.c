@@ -101,7 +101,7 @@ int mywrite(int fd, char *buf, int nbytes)
     if (remain < nbytes)
       nbytes = remain;
 
-    memcpy(cp, cq, remain);
+    memcpy(cp, cq, nbytes);
     count += nbytes;
     oftp->offset += nbytes;
     remain -= nbytes;
