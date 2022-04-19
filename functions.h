@@ -105,7 +105,7 @@ int open_file(int mode);
 
 int mytruncate(MINODE *mip);
 
-int close_file(int fd);
+int close_file();
 
 int mylseek(int fd, int position);
 

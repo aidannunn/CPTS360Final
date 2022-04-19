@@ -115,10 +115,7 @@ int main(int argc, char *argv[ ])
       open_file(mode);
     else if (strcmp(cmd, "close")==0)
     {
-      char* ptr;
-      int path = strtol(pathname, &ptr, 1);
-      printf("descriptor=%d\n", path);
-      close_file(path);
+      close_file();
     }
     else if (strcmp(cmd, "lseek")==0)
     {

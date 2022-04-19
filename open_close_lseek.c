@@ -148,8 +148,37 @@ int mytruncate(MINODE* mip)
     mip->dirty = 1;
 }
 
-int close_file(int fd)
+int close_file()
 {
+    int fd;
+    //1. get file's minode
+    int ino = getino(pathname);
+    printf("getino succeeded\n");
+    if (ino == 0)//file does not exist
+    {   
+        printf("file does not exist\n");
+        return -1;
+    }
+    MINODE *mip = iget(dev, ino);
+    
+    //check mip->INODE.i_mode to verify it's a regular file and permission OK
+    if (mip->INODE.i_mode != 33188)
+    {
+        printf("file is not a REGULAR file\n");
+        return -1;
+    }
+    
+    //get fd
+    for (int i=0; i<NFD; i++)
+    {
+        if(running->fd[i]->minodePtr->ino == mip->ino)
+        {
+            fd = i;
+            break;
+        }
+    }
+
+    printf("mark1\n");
     printf("fd=%d\n", fd);
     //1. verify fd is within range
     if (fd < 0 || fd > NFD-1){
@@ -168,14 +197,15 @@ int close_file(int fd)
     running->fd[fd] = 0;
     printf("mark2\n");
     oftp->refCount--;
+    oftp->mode = NULL;
 
     if(oftp->refCount > 0){
         return 0;
     }
     printf("mark3\n");
-    MINODE* mip = oftp->minodePtr;
+    mip = oftp->minodePtr;
     iput(mip);
-
+    
     
     return 0;
 }
@@ -211,7 +241,7 @@ int pfd()
             printf("    %d", i);
             printf("      %d",running->fd[i]->mode);
             printf("         %d", running->fd[i]->offset);
-            printf("       [%d, %d]\n", running->fd[i]->minodePtr->dev, running->fd[i]->minodePtr->ino);
+            printf("      [%d, %d]\n", running->fd[i]->minodePtr->dev, running->fd[i]->minodePtr->ino);
         }
     }
     printf("   ------------------------------\n");
