@@ -117,14 +117,14 @@ int main(int argc, char *argv[ ])
     {
       char* ptr;
       int path = strtol(pathname, &ptr, 1);
-      printf("descriptor=%d", path);
+      printf("descriptor=%d\n", path);
       close_file(path);
     }
     else if (strcmp(cmd, "lseek")==0)
     {
       char* ptr;
       int path = strtol(pathname, &ptr, 1);
-      printf("descriptor=%d", path);
+      printf("descriptor=%d\n", path);
       mylseek(path, mode);
     }
     else if (strcmp(cmd, "pfd")==0)

@@ -175,6 +175,8 @@ int close_file(int fd)
     printf("mark3\n");
     MINODE* mip = oftp->minodePtr;
     iput(mip);
+
+    
     return 0;
 }
 
@@ -186,7 +188,7 @@ int mylseek(int fd, int position)
     int originalPosition = oftp->offset;
 
     //change OFT entry's offset to position, but make sure NOT to over run either end of the file
-    if (position < 0 )//|| position > (fileSize-1))//figure out how to get filesize
+    if (position < 0 || position > (running->fd[fd]->minodePtr->INODE.i_size - 1))//figure out how to get filesize
     {
         printf("position out of bounds\n");
         return -1;
@@ -204,13 +206,13 @@ int pfd()
     printf("   ----   ----    ------    -----\n");
     for (i=0; i<NFD; i++)
     {
-        if (running->fd[i] == 0){
-            break;
+        if (running->fd[i] != 0)
+        {
+            printf("    %d", i);
+            printf("      %d",running->fd[i]->mode);
+            printf("         %d", running->fd[i]->offset);
+            printf("       [%d, %d]\n", running->fd[i]->minodePtr->dev, running->fd[i]->minodePtr->ino);
         }
-        printf("    %d", i);
-        printf("      %d",running->fd[i]->mode);
-        printf("         %d", running->fd[i]->offset);
-        printf("       [%d, %d]\n", running->fd[i]->minodePtr->dev, running->fd[i]->minodePtr->ino);
     }
     printf("   ------------------------------\n");
 }
