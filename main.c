@@ -18,7 +18,7 @@ int init();
 int quit();
 int mount_root();
 
-char *disk = "diskimage";
+char *disk = "mydisk";
 
 int main(int argc, char *argv[ ])
 {
@@ -67,7 +67,8 @@ int main(int argc, char *argv[ ])
 
   while(1){
 
-    printf("\ninput command : [ls|cd|pwd|mkdir|creat|rmdir|link|unlink|symlink|open|close|lseek|pfd|quit] ");
+    printf("\ninput command : [ls|cd|pwd|cat|mkdir|creat|cp|mv|rmdir|link|unlink|symlink|open|close|"
+    "read|write|lseek|pfd|quit] ");
 
     fgets(line, 128, stdin);
     line[strlen(line)-1] = 0;
@@ -129,6 +130,32 @@ int main(int argc, char *argv[ ])
     }
     else if (strcmp(cmd, "pfd")==0)
       pfd();
+    else if (strcmp(cmd, "read")==0)
+      read_file();
+    else if (strcmp(cmd, "cat")==0)
+      myCat(pathname);
+    else if (strcmp(cmd, "write")==0)
+      write_file();
+    else if (strcmp(cmd, "cp")==0)
+    {
+      char* token, *src, *dest;
+      token = strtok(line, " ");
+      token = strtok(NULL, " ");
+      src = token;
+      token = strtok(NULL, " ");
+      dest = token;
+      myCP(src, dest);
+    }
+    else if (strcmp(cmd, "mv")==0)
+    {
+      char* token, *src, *dest;
+      token = strtok(line, " ");
+      token = strtok(NULL, " ");
+      src = token;
+      token = strtok(NULL, " ");
+      dest = token;
+      myMV(src, dest);
+    }
     else if (strcmp(cmd, "quit")==0)
       quit();
   }
@@ -163,7 +190,7 @@ int init()
     }
     p->next = &proc[i+1];
   }
-  
+
 }
 
 // load root INODE and set root pointer to it
