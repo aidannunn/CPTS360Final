@@ -122,4 +122,10 @@ int myread(int fd, char *buf, int nbytes);
 int read_file();
 
 int myCat(char* filename);
+
+/* write_cp */
+
+int mywrite(int fd, char *buf, int nbytes);
+
+int write_file();
 #endif

@@ -38,11 +38,10 @@ int myread(int fd, char *buf, int nbytes)
     }
     else{
          //  double indirect blocks, mailman algorithm
-         int dibsize = BLKSIZE / sizeof(int);
          get_block(mip->dev, mip->INODE.i_block[13], readbuf);
-         lbk = lbk - dibsize - 12;
-         get_block(mip->dev, readbuf[lbk / dibsize], doublebuf);
-         blk = doublebuf[lbk % dibsize];
+         lbk = lbk - 256 - 12;
+         get_block(mip->dev, readbuf[lbk / 256], doublebuf);
+         blk = doublebuf[lbk % 256];
     }
 
     /* get the data block into readbuf[BLKSIZE] */
