@@ -1,5 +1,0 @@
-#! /bin/bash
-sudo mount mydisk /mnt    # mount disk under Linux
-#sudo ls -a -i -l /mnt   # show . and .., inode number, long format
-sudo cat /mnt/small
-sudo umount /mnt

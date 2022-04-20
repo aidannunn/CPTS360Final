@@ -92,7 +92,9 @@ int read_file()
     printf("fd is not opened for RD or RW\n");
     return -1;
   }
-  return(myread(fd, buf, nbytes));
+  int toReturn = myread(fd, buf, nbytes);
+  printf("%s\n", buf);
+  return toReturn;
 }
 
 int myCat(char* filename)

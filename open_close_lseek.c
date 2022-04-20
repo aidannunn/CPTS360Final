@@ -197,7 +197,7 @@ int close_file()
     running->fd[fd] = 0;
     //printf("mark2\n");
     oftp->refCount--;
-    oftp->mode = NULL;
+    oftp->mode = 0;
 
     if(oftp->refCount > 0){
         return 0;

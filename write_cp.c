@@ -3,7 +3,7 @@
 int mywrite(int fd, char *buf, int nbytes)
 {
   int count = 0, lbk = 0, blk, remain, startByte;
-  char doublebuf[256], *cp;
+  char *cp;
   MINODE *mip;
   OFT *oftp;
   char *cq = buf;
@@ -23,16 +23,16 @@ int mywrite(int fd, char *buf, int nbytes)
     else if (lbk >= 12 && lbk < 256 + 12){ // INDIRECT blocks
       // HELP INFO:
       if (mip->INODE.i_block[12] == 0){
-          char kbuf[256];
+          int ibuf[256];
           //allocate a block for it;
           mip->INODE.i_block[12] = balloc(mip->dev);
           //zero out the block on disk !!!!
-          get_block(mip->dev, mip->INODE.i_block[12], kbuf);
-          int *arr = (int*)kbuf;
+          get_block(mip->dev, mip->INODE.i_block[12], (char*)ibuf);
+          int *arr = ibuf;
           for (int i = 0; i < 256; i++) {
             arr[i] = 0;
           }
-          put_block(mip->dev, mip->INODE.i_block[12], kbuf);
+          put_block(mip->dev, mip->INODE.i_block[12], (char*)ibuf);
           mip->INODE.i_blocks++;;
       }
       //i_block[12] exists
@@ -49,47 +49,40 @@ int mywrite(int fd, char *buf, int nbytes)
         }
      }
      else {
-        char kbuf[256], inbuf[256], dinbuf[256];
        // double indirect blocks */
+       int ibuf[BLKSIZE], inbuf[BLKSIZE], dinbuf[BLKSIZE];
        if (mip->INODE.i_block[13] == 0) {
-         //allocate a block for it;
+         //Make and Allocate
          mip->INODE.i_block[13] = balloc(mip->dev);
-         //zero out the block on disk !!!!
-         get_block(mip->dev, mip->INODE.i_block[13], kbuf);
-         int *arr = (int*)kbuf;
+         get_block(mip->dev, mip->INODE.i_block[13], (char *)ibuf);
+         int *arr = ibuf;
          for (int i = 0; i < 256; i++) {
            arr[i] = 0;
          }
-         put_block(mip->dev, mip->INODE.i_block[13], kbuf);
+         put_block(mip->dev, mip->INODE.i_block[13], (char *)ibuf);
          mip->INODE.i_blocks++;
        }
-       //i_block[13] exists, go into
-       //get i_block[13] into an int ibuf[256];
-       int ibuf[256];
        get_block(mip->dev, mip->INODE.i_block[13], (char *)ibuf);
-       blk = ibuf[lbk / 256];
-       if (blk==0){ //indirect block DNE
-         //allocate a disk block;
-         blk = ibuf[lbk / 256] = balloc(mip->dev);
-         //zero out the block on disk !!!!
-         get_block(mip->dev, ibuf[lbk / 256], inbuf);
-         int *arr = (int*)inbuf;
+       lbk = lbk - 256 - 12;
+       int indirect = ibuf[lbk / 256];
+       if (indirect == 0) {
+         //Make and Allocate
+         get_block(mip->dev, indirect, (char *)inbuf);
+         int *arr = inbuf;
          for (int i = 0; i < 256; i++) {
            arr[i] = 0;
          }
+         put_block(mip->dev, indirect, (char *)inbuf);
          mip->INODE.i_blocks++;
-         put_block(mip->dev, ibuf[lbk / 256], (char *)inbuf);
+         put_block(mip->dev, mip->INODE.i_block[13], (char *)ibuf);
        }
-       //i_block[13]->indirectblock[] exists, go into
-       int dbuf[256];
-       get_block(mip->dev, ibuf[lbk / 256], (char *)dbuf);
-       blk = dbuf[lbk / 256];
-       if (blk == 0) {
-         //allocate a disk block;
-         blk = dbuf[lbk / 256] = balloc(mip->dev);
+
+       get_block(mip->dev, indirect, (char *)dinbuf);
+       if (dinbuf[lbk % 256] == 0) {
+         //Make and Allocate
+         dinbuf[lbk % 256] = balloc(mip->dev);
          mip->INODE.i_blocks++;
-         //record it in i_block[12];
-         put_block(mip->dev, ibuf[lbk / 256], (char *)dbuf);
+         put_block(mip->dev, indirect, (char *)dinbuf);
        }
     }
 
@@ -145,9 +138,13 @@ int myCP(char* src, char* dest) //cp src dest
   int gd = open_file(1);
 
   //Copy
-  myread(fd, buf, BLKSIZE);
-  mywrite(gd, buf, strlen(buf));
-
+  int count;
+  while (1) {
+    count = myread(fd, buf, BLKSIZE);
+    if (count == 0)
+      break;
+    mywrite(gd, buf, count);
+  }
   //close src and dest
   close_file();
   strcpy(pathname, src);
