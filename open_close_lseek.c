@@ -7,7 +7,7 @@ int open_file(int mode)
     int i;
     //1. get file's minode
     int ino = getino(pathname);
-    printf("getino succeeded\n");
+    //printf("getino succeeded\n");
     if (ino == 0)//file does not exist
     {
         printf("file does not exist. creating file\n");
@@ -26,7 +26,7 @@ int open_file(int mode)
     //check whether the file is already opened with INCOMPATIBLE mode
     for (i = 0; i<NOFT; i++){
         if (oft[i].minodePtr == mip){
-            if (oft[i].mode == 0 || oft[i].mode == 1 || oft[i].mode == 2 || oft[i].mode == 3){
+            if (oft[i].mode == 1 || oft[i].mode == 2 || oft[i].mode == 3){
                 printf("file is already open as an incompatible mode\n");
                 return -1;
             }
@@ -153,21 +153,21 @@ int close_file()
     int fd;
     //1. get file's minode
     int ino = getino(pathname);
-    printf("getino succeeded\n");
+    //printf("getino succeeded\n");
     if (ino == 0)//file does not exist
-    {   
+    {
         printf("file does not exist\n");
         return -1;
     }
     MINODE *mip = iget(dev, ino);
-    
+
     //check mip->INODE.i_mode to verify it's a regular file and permission OK
     if (mip->INODE.i_mode != 33188)
     {
         printf("file is not a REGULAR file\n");
         return -1;
     }
-    
+
     //get fd
     for (int i=0; i<NFD; i++)
     {
@@ -178,8 +178,8 @@ int close_file()
         }
     }
 
-    printf("mark1\n");
-    printf("fd=%d\n", fd);
+    //printf("mark1\n");
+    //printf("fd=%d\n", fd);
     //1. verify fd is within range
     if (fd < 0 || fd > NFD-1){
         printf("fd out of range\n");
@@ -195,18 +195,18 @@ int close_file()
     //3. rest of code from website
     OFT* oftp = running->fd[fd];
     running->fd[fd] = 0;
-    printf("mark2\n");
+    //printf("mark2\n");
     oftp->refCount--;
     oftp->mode = NULL;
 
     if(oftp->refCount > 0){
         return 0;
     }
-    printf("mark3\n");
+    //printf("mark3\n");
     mip = oftp->minodePtr;
     iput(mip);
-    
-    
+
+
     return 0;
 }
 

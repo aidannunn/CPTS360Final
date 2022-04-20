@@ -149,8 +149,9 @@ int myCP(char* src, char* dest) //cp src dest
   mywrite(gd, buf, strlen(buf));
 
   //close src and dest
-  close_file(fd);
-  close_file(gd);
+  close_file();
+  strcpy(pathname, src);
+  close_file();
 }
 
 int myMV(char* src, char* dest)
