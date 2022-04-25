@@ -84,6 +84,7 @@ int mywrite(int fd, char *buf, int nbytes)
          mip->INODE.i_blocks++;
          put_block(mip->dev, indirect, (char *)dinbuf);
        }
+       //blk = dinbuf[lb % 256];
     }
 
     char wbuf[BLKSIZE];
@@ -143,6 +144,7 @@ int myCP(char* src, char* dest) //cp src dest
     count = myread(fd, buf, BLKSIZE);
     if (count == 0)
       break;
+    buf[count] = 0;
     mywrite(gd, buf, count);
   }
   //close src and dest

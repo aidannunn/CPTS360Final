@@ -1,4 +1,5 @@
 #! /bin/bash
 sudo mount mydisk /mnt           
 sudo ls -l /mnt                   # should see all files
+sudo diff /mnt/huge /mnt/newhuge  # diff will show differences, if ANY
 sudo umount /mnt

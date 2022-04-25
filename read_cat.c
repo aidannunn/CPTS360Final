@@ -108,6 +108,7 @@ int myCat(char* filename)
     count = myread(fd, mybuf, BLKSIZE);
     if (count == 0)
       break;
+    mybuf[count] = 0;
     printf("%s", mybuf);
   }
   strcpy(pathname, filename);
