@@ -16,5 +16,6 @@ int fd, dev;
 int nblocks, ninodes, bmap, imap, iblk;
 char line[128], cmd[32], pathname[128];
 
+MOUNT mountTable[8];  // set all dev = 0 in init()
 
 #endif

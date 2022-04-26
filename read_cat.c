@@ -3,7 +3,7 @@
 int myread(int fd, char *buf, int nbytes)
 {
   int count = 0, lbk = 0, startByte = 0, avil, blk, remain;
-  char readbuf[BLKSIZE], *cq;
+  char *cq;
   MINODE *mip;
   OFT *oftp;
 
@@ -45,7 +45,7 @@ int myread(int fd, char *buf, int nbytes)
          get_block(mip->dev, ibuf[lbk / 256], (char*)doublebuf);
          blk = doublebuf[lbk % 256];
     }
-
+    char readbuf[BLKSIZE];
     /* get the data block into readbuf[BLKSIZE] */
     get_block(mip->dev, blk, readbuf);
 
@@ -57,12 +57,9 @@ int myread(int fd, char *buf, int nbytes)
       nbytes = avil;
 
     memcpy(cq, cp, nbytes);
-    cq += nbytes;
-    cp += nbytes;
     count += nbytes;
     oftp->offset += nbytes;
     avil -= nbytes;
-    remain -= nbytes;
     nbytes = 0;
 
     if (nbytes <= 0 || avil <= 0)

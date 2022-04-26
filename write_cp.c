@@ -50,23 +50,25 @@ int mywrite(int fd, char *buf, int nbytes)
      }
      else {
        // double indirect blocks */
-       int ibuf[BLKSIZE], inbuf[BLKSIZE], dinbuf[BLKSIZE];
-       if (mip->INODE.i_block[13] == 0) {
-         //Make and Allocate
-         mip->INODE.i_block[13] = balloc(mip->dev);
-         get_block(mip->dev, mip->INODE.i_block[13], (char *)ibuf);
-         int *arr = ibuf;
-         for (int i = 0; i < 256; i++) {
-           arr[i] = 0;
-         }
-         put_block(mip->dev, mip->INODE.i_block[13], (char *)ibuf);
-         mip->INODE.i_blocks++;
+       int ibuf[256], inbuf[256], dinbuf[256];
+       lbk = lbk - 256 - 12;
+       if (mip->INODE.i_block[13] == 0){
+           //allocate a block for it;
+           mip->INODE.i_block[13] = balloc(mip->dev);
+           //zero out the block on disk !!!!
+           get_block(mip->dev, mip->INODE.i_block[13], (char*)ibuf);
+           int *arr = ibuf;
+           for (int i = 0; i < 256; i++) {
+             arr[i] = 0;
+           }
+           put_block(mip->dev, mip->INODE.i_block[13], (char*)ibuf);
+           mip->INODE.i_blocks++;;
        }
        get_block(mip->dev, mip->INODE.i_block[13], (char *)ibuf);
-       lbk = lbk - 256 - 12;
        int indirect = ibuf[lbk / 256];
        if (indirect == 0) {
          //Make and Allocate
+         ibuf[lbk] = balloc(mip->dev);
          get_block(mip->dev, indirect, (char *)inbuf);
          int *arr = inbuf;
          for (int i = 0; i < 256; i++) {
@@ -84,7 +86,7 @@ int mywrite(int fd, char *buf, int nbytes)
          mip->INODE.i_blocks++;
          put_block(mip->dev, indirect, (char *)dinbuf);
        }
-       //blk = dinbuf[lb % 256];
+       blk = dinbuf[lbk % 256];
     }
 
     char wbuf[BLKSIZE];
@@ -107,7 +109,7 @@ int mywrite(int fd, char *buf, int nbytes)
     // loop back to outer while to write more .... until nbytes are written
   }
   mip->dirty = 1;
-  printf("wrote %d char into file descriptor fd=%d\n", count, fd);
+  //printf("wrote %d char into file descriptor fd=%d\n", count, fd);
   return count;
 }
 
