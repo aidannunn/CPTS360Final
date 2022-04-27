@@ -1,7 +1,7 @@
 #include "functions.h"
 
-//access() return 1 if permission OK, 0 if not
-int access(char *filename, char mode)
+//myaccess() return 1 if permission OK, 0 if not
+int myaccess(char *filename, char mode)
 {
     int r; 
     char ownerBits, otherBits;

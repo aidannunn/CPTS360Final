@@ -134,6 +134,6 @@ int myCP(char* src, char* dest);
 int myMV(char* src, char* dest);
 
 /* access */
-int access(char *filename, char mode);
+int myaccess(char *filename, char mode);
 
 #endif
