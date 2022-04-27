@@ -18,13 +18,14 @@ int init();
 int quit();
 int mount_root();
 
-char *disk = "mydisk";
+char *disk;
 
 int main(int argc, char *argv[ ])
 {
   int ino, mode;
   char buf[BLKSIZE];
-
+  
+  disk = argv[1];
   printf("checking EXT2 FS ....");
   if ((fd = open(disk, O_RDWR)) < 0){
     printf("open %s failed\n", disk);
